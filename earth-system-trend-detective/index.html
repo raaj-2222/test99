@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#08121d" />
+  <meta name="description" content="Earth System Trend Detective — explore real NASA POWER observations from five Indian locations, 2001–2025. Transparent trend statistics, interactive maps and scientific caveats." />
+  <title>TerraScope · Earth System Trend Detective</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoAOHPTlxPWaA=" crossorigin="" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script defer src="./data/results.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="./index.html" aria-label="TerraScope home">
+        <span class="brand-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="1.7" /><ellipse cx="24" cy="24" rx="7.2" ry="18" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 24h36M11 13c7 5 19 5 26 0M11 35c7-5 19-5 26 0" stroke="currentColor" fill="none" stroke-width="1.4"/><circle cx="30" cy="16" r="5" fill="#8dffd0"/></svg></span>
+        <span><strong>TerraScope</strong><small>Earth intelligence lab</small></span>
+      </a>
+      <div class="sidebar-group">
+        <p class="eyebrow">MISSION CONTROL</p>
+        <div class="nav-active"><span class="nav-symbol">◈</span> Trend explorer <span class="nav-dot"></span></div>
+        <a class="nav-link" href="#evidence"><span class="nav-symbol">▤</span> Evidence table</a>
+        <a class="nav-link" href="#methods"><span class="nav-symbol">⌁</span> Methodology</a>
+      </div>
+      <div class="sidebar-group filters">
+        <p class="eyebrow">EXPLORE DATA</p>
+        <label for="metricSelect">Earth system variable</label>
+        <select id="metricSelect" aria-label="Choose a variable"></select>
+        <label for="periodSelect">Observation period</label>
+        <select id="periodSelect" aria-label="Choose a time period"></select>
+        <label for="citySelect">Focus location</label>
+        <select id="citySelect" aria-label="Choose a city"></select>
+        <label for="compareSelect">Compare with</label>
+        <select id="compareSelect" aria-label="Choose comparison location"></select>
+        <label class="check-label"><input id="significantOnly" type="checkbox" /> <span>Highlight significant only</span></label>
+        <button id="resetBtn" class="reset-btn" type="button">↺ Reset exploration</button>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="source-pill"><span class="source-led"></span> <span>NASA POWER<br /><strong>2001 — 2025</strong></span></div>
+        <a target="_blank" rel="noopener noreferrer" href="https://power.larc.nasa.gov/data-access-viewer/">Explore original source ↗</a>
+      </div>
+    </aside>
+
+    <main id="main" class="main-content">
+      <header class="topbar"><span class="crumb">SPACE APPS / EARTH SYSTEM TREND DETECTIVE</span><div class="top-actions"><span class="live-dot"></span> REAL NASA DATA <span class="separator">/</span> <span>25 YEARS</span></div></header>
+      <section class="hero">
+        <div><div class="hero-tag"><span>✦</span> RESEARCH PROTOTYPE <span class="tag-separator">·</span> SOUTH ASIA</div>
+        <h1>Read between <em>the trends.</em></h1>
+        <p>Five locations. Eight environmental variables. Twenty-five years of Earth observation data. Discover what's changing—and what the statistics actually support.</p></div>
+        <div class="hero-orbit" aria-hidden="true"><div class="orbit orbit1"></div><div class="orbit orbit2"></div><div class="orbit orbit3"></div><div class="earth-glow"></div><span class="orbit-pin">✦</span></div>
+      </section>
+
+      <section class="kpis" aria-label="Project summary">
+        <article class="kpi"><div class="kpi-top">STUDY SITES <span>↗</span></div><div class="kpi-value" id="kpiSites">05</div><div class="kpi-caption">across India</div></article>
+        <article class="kpi"><div class="kpi-top">MONTHLY RECORDS <span>◫</span></div><div class="kpi-value" id="kpiRecords">1,500</div><div class="kpi-caption">2001 – 2025</div></article>
+        <article class="kpi"><div class="kpi-top">TESTED TRENDS <span>⌁</span></div><div class="kpi-value" id="kpiTests">200</div><div class="kpi-caption">annual + seasonal</div></article>
+        <article class="kpi"><div class="kpi-top">CONFIRMED SITES <span class="mint">●</span></div><div class="kpi-value" id="kpiConfirmed">—</div><div class="kpi-caption" id="kpiConfirmedCaption">for selected variable & period</div></article>
+      </section>
+
+      <section class="analytics-grid" aria-label="Interactive trend visualizations">
+        <article class="panel map-panel">
+          <div class="panel-header"><div><div class="overline">01 / GEOGRAPHY</div><h2>Where is it changing?</h2></div><span class="panel-action">POINT SAMPLES</span></div>
+          <div id="map" role="application" aria-label="Interactive map of the five study locations"></div>
+          <div id="mapFallback" class="map-fallback" hidden>Map tiles require an internet connection. Select a location using the dropdown or evidence table.</div>
+          <div class="legend"><span><i class="legend-dot up"></i> Rising</span><span><i class="legend-dot down"></i> Falling</span><span><i class="legend-ring"></i> Not FDR-significant</span></div>
+          <div class="map-caption" id="mapCaption">Marker colors show Sen's slope direction; filled markers pass the selected FDR threshold.</div>
+        </article>
+        <article class="panel trend-panel">
+          <div class="panel-header"><div><div class="overline">02 / TIME SERIES</div><h2>How has it evolved?</h2></div><span class="panel-action" id="seriesUnit">—</span></div>
+          <div class="chart-title-row"><div><strong id="chartTitle">—</strong><small id="chartSubtitle">—</small></div><span class="chart-status" id="trendStatus">—</span></div>
+          <div class="chart-wrap"><canvas id="trendChart" role="img" aria-label="Historical data and Sen trend line"></canvas><div id="chartFallback" hidden>Charts require JavaScript Chart.js to be available; the evidence table and exported data remain accessible.</div></div>
+          <div class="chart-legend"><span><i class="key-line primary"></i> Selected location</span><span><i class="key-line secondary"></i> Comparison</span><span><i class="key-line trend"></i> Sen trend</span></div>
+          <div class="finding-strip"><div><small>TREND / DECADE</small><b id="slopeValue">—</b></div><div><small>95% SEN INTERVAL</small><b id="intervalValue">—</b></div><div><small>FDR q-VALUE</small><b id="qValue">—</b></div></div>
+        </article>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel contrast-panel"><div class="panel-header"><div><div class="overline">03 / DISCOVERY</div><h2>Two places. Two stories.</h2></div><span class="panel-action">CONTRAST ENGINE</span></div>
+          <div class="contrast-copy"><span class="contrast-identifier">AUTOMATIC FINDING</span><h3 id="contrastHeadline">Looking for contrasting patterns…</h3><p id="contrastDescription">A change in one region doesn't imply the same change everywhere.</p></div>
+          <div class="contrast-sites" id="contrastSites"></div>
+          <div class="contrast-footer"><span id="contrastConfidence">Comparisons use adjusted q-values</span><button id="jumpContrast" type="button">Explore this comparison ↗</button></div>
+        </article>
+        <article class="panel ranking-panel"><div class="panel-header"><div><div class="overline">04 / COMPARISON</div><h2>Regional trend ranking</h2></div><span class="panel-action" id="rankUnit">—</span></div><p class="subtle">Sen's slope per decade · five locations · filled bars pass FDR q &lt; 0.05.</p><div id="rankingBars" class="ranking-bars"></div></article>
+      </section>
+
+      <section id="evidence" class="panel evidence-panel"><div class="panel-header"><div><div class="overline">05 / VERIFIABLE RESULTS</div><h2>The evidence table</h2></div><button class="download-btn" type="button" id="downloadBtn">↓ Download CSV</button></div><div class="table-scroll"><table><thead><tr><th>LOCATION</th><th>RATE / DECADE</th><th>95% SEN INTERVAL</th><th>p-VALUE</th><th>FDR q-VALUE</th><th>RESULT</th></tr></thead><tbody id="evidenceBody"></tbody></table></div><p class="table-note" id="evidenceNote"></p></section>
+
+      <section id="methods" class="panel methods-panel"><div class="panel-header"><div><div class="overline">06 / SCIENTIFIC INTEGRITY</div><h2>What these findings mean</h2></div><button class="download-btn" type="button" id="briefBtn">↓ Download case brief</button></div><div class="method-cols"><div><span class="method-num">01</span><h3>What is the trend?</h3><p>Sen's slope estimates the median rate of change across year pairs. A 95% slope interval describes uncertainty under the estimator's assumptions. Rainfall values are accumulated to millimetres per period.</p></div><div><span class="method-num">02</span><h3>Is it significant?</h3><p>A two-sided Mann–Kendall test yields a p-value. Benjamini–Hochberg correction then controls the false discovery rate across five cities for each variable and period; we use q &lt; 0.05.</p></div><div><span class="method-num">03</span><h3>What are the limits?</h3><p>These are five NASA POWER grid-based point samples, not an India-wide pixel map. Tests assume independent annual values and don't adjust for autocorrelation or abrupt dataset changes. Trends do not establish causes.</p></div></div><div class="source-note"><span class="source-note-icon">ⓘ</span><p><strong>Data provenance:</strong> Original monthly CSV exports from <a href="https://power.larc.nasa.gov/data-access-viewer/" target="_blank" rel="noopener noreferrer">NASA POWER</a>, UTC, 2001–2025. The source headers label <code>IMERG_PRECTOT</code> as “MERRA-2 Total Precipitation”; this project preserves that exact parameter name rather than asserting a more specific source. Analysis code, raw data and reproducibility tests are included.</p></div></section>
+      <footer>TerraScope · NASA Space Apps prototype <span>Built on observations, not assumptions. <a href="./data/trend_results.csv" download>Full results ↗</a></span></footer>
+    </main>
+  </div>
+</body>
+</html>
